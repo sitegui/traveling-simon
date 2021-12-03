@@ -1,7 +1,64 @@
 use crate::models::Timestamp;
+use std::fmt;
 
-#[derive(Debug, Clone)]
-pub struct TimeWindow {
-    start: Option<Timestamp>,
-    end: Option<Timestamp>,
+#[derive(Debug, Clone, Copy)]
+pub struct BoundedTimeWindow {
+    pub start: Timestamp,
+    pub end: Timestamp,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct LeftBoundedTimeWindow {
+    pub start: Timestamp,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct RightBoundedTimeWindow {
+    pub end: Timestamp,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct UnboundedTimeWindow;
+
+#[derive(Debug, Clone, Copy)]
+pub enum TimeWindow {
+    Bounded(BoundedTimeWindow),
+    LeftBounded(LeftBoundedTimeWindow),
+    RightBounded(RightBoundedTimeWindow),
+    Unbounded(UnboundedTimeWindow),
+}
+
+impl fmt::Display for BoundedTimeWindow {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{}, {}]", self.start, self.end)
+    }
+}
+
+impl fmt::Display for LeftBoundedTimeWindow {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{}, ∞]", self.start)
+    }
+}
+
+impl fmt::Display for RightBoundedTimeWindow {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[-∞, {}]", self.end)
+    }
+}
+
+impl fmt::Display for UnboundedTimeWindow {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[-∞, ∞]")
+    }
+}
+
+impl fmt::Display for TimeWindow {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            TimeWindow::Bounded(tw) => tw.fmt(f),
+            TimeWindow::LeftBounded(tw) => tw.fmt(f),
+            TimeWindow::RightBounded(tw) => tw.fmt(f),
+            TimeWindow::Unbounded(tw) => tw.fmt(f),
+        }
+    }
 }

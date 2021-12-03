@@ -1,14 +1,22 @@
+mod capped;
 mod distance;
 mod duration;
 mod ids;
 mod path;
+mod point;
 mod site;
+mod stop;
 mod time_window;
 mod timestamp;
+mod world;
 
+pub use capped::*;
 pub use distance::*;
 pub use duration::*;
 pub use ids::*;
+pub use point::*;
 pub use site::*;
+pub use stop::*;
 pub use time_window::*;
 pub use timestamp::*;
+pub use world::*;
