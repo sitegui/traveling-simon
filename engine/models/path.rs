@@ -14,7 +14,7 @@ impl Path {
         stops: Vec<SiteAndDuty>,
     ) -> Option<Self> {
         // Forward schedule and calculate compressions
-        let mut prev_site = &world[start_in];
+        let mut prev_site = start_in;
         let mut prev_end = start_at;
         let mut compressions = Vec::with_capacity(stops.len());
         let mut total_compression = Duration::ZERO;
@@ -23,7 +23,7 @@ impl Path {
 
         for stop in &stops {
             let site = &world[stop.site];
-            let ride = prev_site.ride_duration(stop.site)?;
+            let ride = world.ride_matrix.get(prev_site, stop.site)?;
             let ride_end = prev_end + ride;
             let service_start = match stop.duty {
                 Some(duty) if duty.start > ride_end => duty.start,
@@ -46,7 +46,7 @@ impl Path {
             slack = slack.min(CappedMax::Value(stop_slack));
             slack -= compression;
 
-            prev_site = site;
+            prev_site = site.id;
             prev_end = service_end;
             compressions.push(compression);
             total_compression += compression;

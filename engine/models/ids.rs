@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{ensure, Context, Result};
 use std::collections::BTreeMap;
 
 macro_rules! derive_id {
@@ -30,14 +30,13 @@ pub trait InternalId: Copy {
 pub struct IdConverter<ID>(BTreeMap<String, ID>);
 
 impl<ID: InternalId> IdConverter<ID> {
-    pub fn new(names: impl IntoIterator<Item = String>) -> Self {
-        IdConverter(
-            names
-                .into_iter()
-                .enumerate()
-                .map(|(i, name)| (name, ID::from_usize(i)))
-                .collect(),
-        )
+    pub fn new(names: impl IntoIterator<Item = String>) -> Result<Self> {
+        let mut map = BTreeMap::new();
+        for (i, name) in names.into_iter().enumerate() {
+            let previous = map.insert(name, ID::from_usize(i));
+            ensure!(previous.is_none());
+        }
+        Ok(IdConverter(map))
     }
 
     pub fn get(&self, name: &str) -> Result<ID> {

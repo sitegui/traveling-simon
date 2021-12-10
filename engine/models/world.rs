@@ -1,4 +1,6 @@
-use crate::models::{input, Duration, IdConverter, InternalId, Site, SiteId, Timestamp};
+use crate::models::{
+    input, Duration, IdConverter, InternalId, RideMatrix, Site, SiteId, Timestamp,
+};
 use anyhow::Result;
 use itertools::Itertools;
 use std::collections::{BTreeMap, BTreeSet};
@@ -11,6 +13,7 @@ pub struct World {
     pub min_start_at: Timestamp,
     pub end_in_one_of: BTreeSet<SiteId>,
     pub max_end_at: Option<Timestamp>,
+    pub ride_matrix: RideMatrix,
 }
 
 impl Index<SiteId> for World {
@@ -23,14 +26,22 @@ impl Index<SiteId> for World {
 
 impl World {
     pub fn try_from_json(input: input::World) -> Result<Self> {
-        let sites = IdConverter::new(input.sites.iter().map(|site| site.name.clone()));
+        let sites = IdConverter::new(input.sites.iter().map(|site| site.name.clone()))?;
+
+        let mut ride_matrix = RideMatrix::empty(input.sites.len());
+        for from_site in &input.sites {
+            let from_site_id = sites.get(&from_site.name)?;
+            for (to_site, &duration) in &from_site.ride_durations {
+                let to_site_id = sites.get(to_site)?;
+                ride_matrix.set(from_site_id, to_site_id, duration);
+            }
+        }
 
         Ok(World {
             sites: input
                 .sites
                 .into_iter()
-                .enumerate()
-                .map(|(i, site)| Site::try_from_json(&sites, site))
+                .map(|site| Site::try_from_json(&sites, site))
                 .try_collect()?,
             start_in_one_of: input
                 .start_in_one_of
@@ -44,6 +55,7 @@ impl World {
                 .map(|el| sites.get(&el))
                 .try_collect()?,
             max_end_at: input.max_end_at,
+            ride_matrix,
         })
     }
 }
