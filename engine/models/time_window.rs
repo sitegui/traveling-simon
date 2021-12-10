@@ -42,6 +42,7 @@ impl BoundedTimeWindow {
     pub fn start(&self) -> Timestamp {
         self.start
     }
+
     pub fn end(&self) -> Timestamp {
         self.end
     }

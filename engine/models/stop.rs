@@ -1,6 +1,12 @@
 use crate::models::*;
 use std::fmt;
 
+#[derive(Debug, Clone, Copy)]
+pub struct StopSketch {
+    pub site: SiteId,
+    pub duty: Option<BoundedTimeWindow>,
+}
+
 #[derive(Debug, Clone)]
 pub struct Stop {
     pub site: SiteId,
@@ -9,6 +15,15 @@ pub struct Stop {
     pub ride_end: Timestamp,
     pub service_start: Timestamp,
     pub service_end: Timestamp,
+}
+
+impl Stop {
+    pub fn sketch(&self) -> StopSketch {
+        StopSketch {
+            site: self.site,
+            duty: self.duty,
+        }
+    }
 }
 
 impl fmt::Display for Stop {

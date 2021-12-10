@@ -1,18 +1,28 @@
 use crate::models::*;
+use std::collections::BTreeSet;
 use std::fmt;
 
 #[derive(Debug, Clone)]
 pub struct Path {
-    start_in: SiteId,
-    stops: Vec<Stop>,
+    pub start_in: SiteId,
+    pub start_at: Timestamp,
+    pub stops: Vec<Stop>,
+    pub cost: PathCost,
+    pub visited_sites: BTreeSet<SiteId>,
 }
 
 impl Path {
-    pub fn try_schedule(world: &World, start_in: SiteId, stops: &[SiteAndDuty]) -> Option<Self> {
-        if stops.is_empty() {
-            return None;
+    pub fn empty(start_in: SiteId, start_at: Timestamp) -> Self {
+        Path {
+            start_in,
+            start_at,
+            stops: vec![],
+            cost: PathCost::new(start_at, &[]),
+            visited_sites: BTreeSet::new(),
         }
+    }
 
+    pub fn try_schedule(world: &World, start_in: SiteId, stops: &[StopSketch]) -> Option<Self> {
         // Forward schedule and calculate compressions
         let mut prev_site = start_in;
         let mut prev_end = world.min_start_at;
@@ -70,16 +80,27 @@ impl Path {
             path_stop.service_end += total_compression;
         }
 
+        let start_at = path_stops.first().map_or(prev_end, |stop| stop.ride_start);
         Some(Path {
             start_in,
+            start_at,
+            cost: PathCost::new(start_at, &path_stops),
+            visited_sites: path_stops.iter().map(|stop| stop.site).collect(),
             stops: path_stops,
         })
+    }
+
+    pub fn end(&self) -> (SiteId, Timestamp) {
+        match self.stops.last() {
+            None => (self.start_in, self.start_at),
+            Some(stop) => (stop.site, stop.service_end),
+        }
     }
 }
 
 impl fmt::Display for Path {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} @ {}", self.start_in, self.stops[0].ride_start)?;
+        write!(f, "{} @ {}", self.start_in, self.start_at)?;
         for stop in &self.stops {
             write!(f, "; {}", stop)?;
         }
@@ -112,11 +133,11 @@ mod tests {
             &world,
             SiteId::from(0),
             &[
-                SiteAndDuty {
+                StopSketch {
                     site: SiteId::from(1),
                     duty: Some(BoundedTimeWindow::from((15, 18))),
                 },
-                SiteAndDuty {
+                StopSketch {
                     site: SiteId::from(2),
                     duty: Some(BoundedTimeWindow::from((39, 50))),
                 },

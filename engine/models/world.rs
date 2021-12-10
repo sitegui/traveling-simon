@@ -9,17 +9,11 @@ pub struct World {
     pub sites: Vec<Site>,
     pub start_in_one_of: BTreeSet<SiteId>,
     pub min_start_at: Timestamp,
-    pub end_in_one_of: BTreeSet<SiteId>,
     pub max_end_at: Option<Timestamp>,
     pub ride_matrix: RideMatrix,
-}
-
-impl Index<SiteId> for World {
-    type Output = Site;
-
-    fn index(&self, index: SiteId) -> &Self::Output {
-        &self.sites[index.as_usize()]
-    }
+    // Heuristics parametrization
+    /// The maximum number of extensions to test from each base path during the initial build phase
+    pub max_tested_extensions: i32,
 }
 
 impl World {
@@ -47,14 +41,14 @@ impl World {
                 .map(|el| sites.get(&el))
                 .try_collect()?,
             min_start_at: input.min_start_at,
-            end_in_one_of: input
-                .end_in_one_of
-                .into_iter()
-                .map(|el| sites.get(&el))
-                .try_collect()?,
             max_end_at: input.max_end_at,
             ride_matrix,
+            max_tested_extensions: input.max_tested_extensions,
         })
+    }
+
+    pub fn ride(&self, from: SiteId, to: SiteId) -> Option<Duration> {
+        self.ride_matrix.get(from, to)
     }
 
     #[cfg(test)]
@@ -68,9 +62,17 @@ impl World {
             sites,
             start_in_one_of: Default::default(),
             min_start_at: Timestamp::mock(),
-            end_in_one_of: Default::default(),
             max_end_at: None,
             ride_matrix,
+            max_tested_extensions: 0,
         }
+    }
+}
+
+impl Index<SiteId> for World {
+    type Output = Site;
+
+    fn index(&self, index: SiteId) -> &Self::Output {
+        &self.sites[index.as_usize()]
     }
 }

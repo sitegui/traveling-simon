@@ -9,6 +9,7 @@ pub struct World {
     pub min_start_at: Timestamp,
     pub end_in_one_of: BTreeSet<String>,
     pub max_end_at: Option<Timestamp>,
+    pub max_tested_extensions: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

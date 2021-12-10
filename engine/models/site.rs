@@ -10,12 +10,6 @@ pub struct Site {
     pub must_visit: bool,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct SiteAndDuty {
-    pub site: SiteId,
-    pub duty: Option<BoundedTimeWindow>,
-}
-
 impl Site {
     pub fn try_from_json(sites: &IdConverter<SiteId>, input: input::Site) -> Result<Self> {
         Ok(Site {
