@@ -1,7 +1,9 @@
-use crate::models::Timestamp;
+use crate::models::{input, Timestamp};
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct BoundedTimeWindow {
     pub start: Timestamp,
     pub end: Timestamp,

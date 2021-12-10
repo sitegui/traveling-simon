@@ -1,5 +1,9 @@
 use crate::models::Duration;
-use anyhow::{ensure, Error};
+use crate::parsers::parse_timestamp;
+use anyhow::{ensure, Error, Result};
+use nom::combinator::all_consuming;
+use nom::Finish;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 use std::ops::{Add, AddAssign, Sub};
 use std::str::FromStr;
@@ -24,23 +28,6 @@ impl Timestamp {
             (self.0 / M) % 60,
             self.0 % 60,
         )
-    }
-}
-
-impl FromStr for Timestamp {
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        ensure!(s.len() == 8);
-        ensure!(&s[2..3] == ":");
-        ensure!(&s[5..6] == ":");
-        let h = s[0..2].parse()?;
-        let m = s[3..5].parse()?;
-        let s = s[6..8].parse()?;
-        ensure!(h >= 0 && h < 24);
-        ensure!(m >= 0 && m < 60);
-        ensure!(s >= 0 && s < 60);
-        Ok(Timestamp::from_dhms(0, h, m, s))
     }
 }
 
@@ -83,5 +70,35 @@ impl Sub for Timestamp {
 impl AddAssign<Duration> for Timestamp {
     fn add_assign(&mut self, rhs: Duration) {
         self.0 += rhs.as_s();
+    }
+}
+
+impl FromStr for Timestamp {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        let (_, timestamp) = all_consuming(parse_timestamp)(s)
+            .finish()
+            .map_err(|e| Error::msg(e.to_string()))?;
+        Ok(timestamp)
+    }
+}
+
+impl Serialize for Timestamp {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.to_string().serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for Timestamp {
+    fn deserialize<D>(deserializer: D) -> Result<Timestamp, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let as_string = String::deserialize(deserializer)?;
+        as_string.parse().map_err(serde::de::Error::custom)
     }
 }

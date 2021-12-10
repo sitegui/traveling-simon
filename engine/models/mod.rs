@@ -2,6 +2,7 @@ mod capped;
 mod distance;
 mod duration;
 mod ids;
+pub mod input;
 mod path;
 mod point;
 mod site;
