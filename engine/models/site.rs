@@ -1,8 +1,5 @@
-use crate::models::ids::SiteId;
-use crate::models::{input, BoundedTimeWindow, Duration, IdConverter};
+use crate::models::*;
 use anyhow::Result;
-use itertools::Itertools;
-use std::collections::BTreeMap;
 
 #[derive(Debug, Clone)]
 pub struct Site {
@@ -28,5 +25,16 @@ impl Site {
             service_time: input.service_time,
             must_visit: input.must_visit,
         })
+    }
+
+    #[cfg(test)]
+    pub fn mock() -> Self {
+        Site {
+            id: SiteId::from_usize(0),
+            name: String::new(),
+            duties: vec![],
+            service_time: Duration::ZERO,
+            must_visit: false,
+        }
     }
 }

@@ -1,12 +1,15 @@
-use crate::models::{input, Timestamp};
-use anyhow::Result;
+use crate::models::*;
+use anyhow::{ensure, Result};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+/// A non-empty time window, bounded in both sides
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct BoundedTimeWindow {
-    pub start: Timestamp,
-    pub end: Timestamp,
+    /// Inclusive
+    start: Timestamp,
+    /// Inclusive
+    end: Timestamp,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -28,6 +31,20 @@ pub enum TimeWindow {
     LeftBounded(LeftBoundedTimeWindow),
     RightBounded(RightBoundedTimeWindow),
     Unbounded(UnboundedTimeWindow),
+}
+
+impl BoundedTimeWindow {
+    pub fn try_new(start: Timestamp, end: Timestamp) -> Result<Self> {
+        ensure!(end > start);
+        Ok(BoundedTimeWindow { start, end })
+    }
+
+    pub fn start(&self) -> Timestamp {
+        self.start
+    }
+    pub fn end(&self) -> Timestamp {
+        self.end
+    }
 }
 
 impl fmt::Display for BoundedTimeWindow {
@@ -62,5 +79,12 @@ impl fmt::Display for TimeWindow {
             TimeWindow::RightBounded(tw) => tw.fmt(f),
             TimeWindow::Unbounded(tw) => tw.fmt(f),
         }
+    }
+}
+
+#[cfg(test)]
+impl From<(i32, i32)> for BoundedTimeWindow {
+    fn from((start, end): (i32, i32)) -> Self {
+        BoundedTimeWindow::try_new(start.into(), end.into()).unwrap()
     }
 }

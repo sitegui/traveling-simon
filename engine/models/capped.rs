@@ -2,8 +2,8 @@ use std::ops::SubAssign;
 
 #[derive(Debug, Clone, Copy, Ord, PartialOrd, Eq, PartialEq)]
 pub enum CappedMax<T> {
-    Max,
     Value(T),
+    Max,
 }
 
 impl<T: Ord> CappedMax<T> {

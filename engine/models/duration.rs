@@ -85,3 +85,10 @@ impl<'de> Deserialize<'de> for Duration {
         as_string.parse().map_err(serde::de::Error::custom)
     }
 }
+
+#[cfg(test)]
+impl From<i32> for Duration {
+    fn from(t: i32) -> Self {
+        Duration(t)
+    }
+}

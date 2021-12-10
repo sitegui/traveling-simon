@@ -1,6 +1,6 @@
-use crate::models::Duration;
+use crate::models::*;
 use crate::parsers::parse_timestamp;
-use anyhow::{ensure, Error, Result};
+use anyhow::{Error, Result};
 use nom::combinator::all_consuming;
 use nom::Finish;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -29,17 +29,25 @@ impl Timestamp {
             self.0 % 60,
         )
     }
+
+    #[cfg(test)]
+    pub fn mock() -> Self {
+        Timestamp(0)
+    }
 }
 
 #[allow(clippy::many_single_char_names)]
 impl fmt::Display for Timestamp {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let (d, h, m, s) = self.as_dhms();
-        if d == 0 {
-            write!(f, "{:02}:{:02}:{:02}", h, m, s)
-        } else {
-            write!(f, "{:02}:{:02}:{:02} +{}", h, m, s, d)
+        write!(f, "{:02}:{:02}", h, m)?;
+        if s != 0 {
+            write!(f, ":{:02}", s)?;
         }
+        if d != 0 {
+            write!(f, " +{}", d)?;
+        }
+        Ok(())
     }
 }
 
@@ -100,5 +108,12 @@ impl<'de> Deserialize<'de> for Timestamp {
     {
         let as_string = String::deserialize(deserializer)?;
         as_string.parse().map_err(serde::de::Error::custom)
+    }
+}
+
+#[cfg(test)]
+impl From<i32> for Timestamp {
+    fn from(t: i32) -> Self {
+        Timestamp(t)
     }
 }

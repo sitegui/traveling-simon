@@ -1,5 +1,6 @@
-use crate::models::{input, World};
+use crate::models::*;
 use anyhow::Result;
+use itertools::Itertools;
 use std::fs;
 
 mod models;
@@ -11,6 +12,21 @@ fn main() -> Result<()> {
     let world = World::try_from_json(world_input)?;
 
     eprintln!("world = {:?}", world);
+
+    let path = Path::try_schedule(
+        &world,
+        world.sites[0].id,
+        &world
+            .sites
+            .iter()
+            .map(|site| SiteAndDuty {
+                site: site.id,
+                duty: None,
+            })
+            .collect_vec(),
+    )
+    .unwrap();
+    println!("{}", path);
 
     Ok(())
 }

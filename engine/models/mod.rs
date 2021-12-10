@@ -1,5 +1,4 @@
 mod capped;
-mod distance;
 mod duration;
 mod ids;
 pub mod input;
@@ -13,9 +12,9 @@ mod timestamp;
 mod world;
 
 pub use capped::*;
-pub use distance::*;
 pub use duration::*;
 pub use ids::*;
+pub use path::*;
 pub use point::*;
 pub use ride_matrix::*;
 pub use site::*;

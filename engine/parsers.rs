@@ -1,8 +1,8 @@
-use crate::models::{Duration, Timestamp};
+use crate::models::*;
 use nom::bytes::complete::{tag, take};
 use nom::character::complete::u16;
-use nom::combinator::{all_consuming, complete, opt};
-use nom::sequence::{preceded, terminated, tuple};
+use nom::combinator::{all_consuming, opt};
+use nom::sequence::{preceded, terminated};
 use nom::IResult;
 
 pub fn parse_duration(input: &str) -> IResult<&str, Duration> {

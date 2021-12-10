@@ -1,5 +1,6 @@
 use anyhow::{ensure, Context, Result};
 use std::collections::BTreeMap;
+use std::fmt;
 
 macro_rules! derive_id {
     ($name:ident) => {
@@ -13,6 +14,19 @@ macro_rules! derive_id {
 
             fn from_usize(i: usize) -> Self {
                 $name(u8::try_from(i).unwrap())
+            }
+        }
+
+        impl fmt::Display for $name {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                write!(f, "{}", self.0)
+            }
+        }
+
+        #[cfg(test)]
+        impl From<usize> for $name {
+            fn from(i: usize) -> Self {
+                $name::from_usize(i)
             }
         }
     };
