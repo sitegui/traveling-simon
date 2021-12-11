@@ -46,6 +46,10 @@ class RideDurations {
     }
   }
 
+  get (origin, destination) {
+    return this.rideDurations.get(this._getKey(origin, destination))
+  }
+
   async _update (origins, destinations) {
     const response = await fetch('/api/ride-durations', {
       method: 'POST',

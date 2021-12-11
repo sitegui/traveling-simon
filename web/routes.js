@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
 const axios = require('axios')
+const child_process = require('child_process')
 
 if (!GOOGLE_API_KEY) {
   throw new Error('Missing GOOGLE_API_KEY')
@@ -45,6 +46,22 @@ router.post('/api/ride-durations', async (req, res, next) => {
     res.json({
       rideDurations
     })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Proxy the call to the engine binary
+router.post('/api/calculate-paths', (req, res, next) => {
+  try {
+    const child = child_process.execFile('../data/traveling-simon', (err, stdout, _stderr) => {
+      if (err) {
+        return next(err)
+      }
+
+      res.json(JSON.parse(stdout))
+    })
+    child.stdin.end(JSON.stringify(req.body))
   } catch (error) {
     next(error)
   }

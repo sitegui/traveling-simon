@@ -54,6 +54,11 @@ class Hub {
         this.sites.push(site)
       }
       this.rideDurations = RideDurations.fromJSON(data.rideDurations)
+
+      if (this.sites.length > 0) {
+        const bounds = new L.LatLngBounds(this.sites.map(site => site.marker.getLatLng()))
+        this.map.fitBounds(bounds)
+      }
     }
 
     this.showSites()
@@ -188,7 +193,42 @@ class Hub {
     hide(this.showSitesPane)
     show(this.calculatingPathsPanel)
 
-    this.rideDurations.updateForSites(this.sites)
+    this.rideDurations.updateForSites(this.sites).then(() => {
+      // Collect and convert relevant sites
+      const sites = []
+      for (const site of this.sites) {
+        if (site.visit === Site.VISIT_NEVER) {
+          continue
+        }
+
+        sites.push({
+          name: site.name,
+          rideDuration: {},
+          duties: site.duties,
+          serviceTime: `${site.serviceTimeMinutes}m`,
+          mustVisit: site.visit === Site.VISIT_ALWAYS
+        })
+      }
+
+      // Fill in ride duration information
+      for (const origin of sites) {
+        for (const destination of sites) {
+          const ride = this.rideDurations.get(origin, destination)
+          if (ride) {
+            origin.rideDurations[destination.name] = ride
+          }
+        }
+      }
+
+      const world = {
+        sites,
+        // TODO: allow a way to actually fill in these fields
+        start_in_one_of: sites[0].name,
+        min_start_at: '00:00',
+        max_end_at: null,
+        max_tested_extensions: 10
+      }
+    })
   }
 
   static loadStorage () {
