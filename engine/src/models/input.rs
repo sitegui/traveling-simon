@@ -1,12 +1,11 @@
 use crate::models::*;
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct World {
     pub sites: Vec<Site>,
-    pub start_in_one_of: BTreeSet<String>,
     pub min_start_at: Timestamp,
     pub max_end_at: Option<Timestamp>,
     pub max_tested_extensions: i32,
@@ -19,5 +18,6 @@ pub struct Site {
     pub ride_durations: BTreeMap<String, Duration>,
     pub duties: Vec<BoundedTimeWindow>,
     pub service_time: Duration,
+    pub can_start_here: bool,
     pub must_visit: bool,
 }

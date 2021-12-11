@@ -30,6 +30,7 @@
         </div>
         <div class="col-lg-4 p-3">
             <div id="show-sites-pane">
+                <h2 class="mb-2">Existing sites</h2>
                 <table class="table">
                     <thead>
                     <tr>
@@ -49,11 +50,21 @@
                     </tbody>
                 </table>
                 <p>Click on the map to add new sites</p>
+                <div class="mb-2 row g-2">
+                    <label class="col-sm-4 col-form-label" for="min-start-at">Start after</label>
+                    <div class="col-sm-8"><input class="form-control" id="min-start-at" type="time" step="60"></div>
+                    <div class="form-text">The earliest date to start the path</div>
+                </div>
+                <div class="mb-2 row g-2">
+                    <label class="col-sm-4 col-form-label" for="max-end-at">Finish before</label>
+                    <div class="col-sm-8"><input class="form-control" id="max-end-at" type="time" step="60"></div>
+                    <div class="form-text">The latest date to end the path. Leave blank for no restriction</div>
+                </div>
                 <p><button class="btn btn-primary" id="calculate-paths">Calculate paths</button></p>
             </div>
             <div id="edit-site-pane" class="d-none">
+                <h2 class="mb-2">Edit site</h2>
                 <form>
-                    <h2 class="mb-2">Edit site</h2>
                     <div class="mb-2 row g-2">
                         <label class="col-sm-4 col-form-label" for="site-name">Name</label>
                         <div class="col-sm-8"><input class="form-control" id="site-name"></div>
@@ -84,6 +95,10 @@
                             </div>
                         </div>
                     </fieldset>
+                    <div class="mb-2">
+                        <input type="checkbox" class="form-check-input" id="site-can-start-here">
+                        <label class="col-form-check-label" for="site-can-start-here">Can start here</label>
+                    </div>
                     <div class="mb-2">Duties</div>
                     <table class="table">
                         <thead>

@@ -7,9 +7,11 @@ pub fn build(world: &World) -> PathBag {
     let mut finished_paths = PathBag::new();
 
     // Add seed paths, based on each desired starting position
-    for &start_in in &world.start_in_one_of {
-        let path = Path::empty(start_in, world.min_start_at);
-        base_paths.add(path);
+    for site in &world.sites {
+        if site.can_start_here {
+            let path = Path::empty(site.id, world.min_start_at);
+            base_paths.add(path);
+        }
     }
 
     while !base_paths.is_empty() {
@@ -32,11 +34,9 @@ fn build_iteration(world: &World, finished_paths: &mut PathBag, base_paths: Path
 
     // For each base path, try all possible extensions
     for base_path in base_paths.into_vec() {
-        let something_added = extend_path(world, &base_path, &mut new_bag);
+        extend_path(world, &base_path, &mut new_bag);
 
-        // If this base path could not produced any good extended path, then it's said to be
-        // "finished"
-        if !something_added {
+        if base_path.visited_sites.is_superset(&world.must_visit) {
             finished_paths.add(base_path);
         }
     }

@@ -14,4 +14,16 @@ function hide (el) {
   el.classList.add('d-none')
 }
 
+async function postApi (url, body) {
+  const response = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+
+  return response.json()
+}
+
 window.hub = new Hub()

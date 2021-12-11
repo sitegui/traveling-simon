@@ -1,4 +1,4 @@
-/* global $, $$, L, Site, show, hide, RideDurations */
+/* global $, $$, L, Site, show, hide, RideDurations, postApi */
 
 class Hub {
   constructor (el) {
@@ -6,6 +6,8 @@ class Hub {
     this.sites = []
     this.editingSite = null
     this.rideDurations = new RideDurations()
+    this.minStartAt = '09:00'
+    this.maxEndAt = null
 
     // eslint-disable-next-line no-template-curly-in-string
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -41,6 +43,15 @@ class Hub {
     $('#calculate-paths').onclick = () => {
       this.calculatePaths()
     }
+    $('#min-start-at').oninput = event => {
+      this.minStartAt = event.currentTarget.value
+      this.persistStorage()
+    }
+    $('#max-end-at').oninput = event => {
+      const value = event.currentTarget.value
+      this.maxEndAt = value === '' ? null : value
+      this.persistStorage()
+    }
 
     // Reload persisted data
     const data = Hub.loadStorage()
@@ -50,10 +61,13 @@ class Hub {
         site.visit = dataSite.visit
         site.serviceTimeMinutes = dataSite.serviceTimeMinutes
         site.duties = dataSite.duties
+        site.canStartHere = dataSite.canStartHere
         this.updateSiteMarker(site)
         this.sites.push(site)
       }
       this.rideDurations = RideDurations.fromJSON(data.rideDurations)
+      this.minStartAt = data.minStartAt
+      this.maxEndAt = data.maxEndAt
 
       if (this.sites.length > 0) {
         const bounds = new L.LatLngBounds(this.sites.map(site => site.marker.getLatLng()))
@@ -92,6 +106,7 @@ class Hub {
     for (const duty of site.duties) {
       this.pushDutyRow(duty.start, duty.end)
     }
+    $('#site-can-start-here').checked = site.canStartHere
   }
 
   pushDutyRow (start, end) {
@@ -118,6 +133,8 @@ class Hub {
   }
 
   saveSite () {
+    // TODO: check invariants: unique name and valid bounded time windows
+
     this.editingSite.name = $('#site-name').value
     this.editingSite.serviceTimeMinutes = Number.parseInt($('#site-service-time').value)
     this.editingSite.visit = $('#edit-site-pane form')['site-visit'].value
@@ -129,6 +146,7 @@ class Hub {
         this.editingSite.duties.push({ start, end })
       }
     }
+    this.editingSite.canStartHere = $('#site-can-start-here').checked
     this.updateSiteMarker(this.editingSite)
 
     this.persistStorage()
@@ -158,6 +176,9 @@ class Hub {
       }
       $('.sites', this.showSitesPane).appendChild(row)
     }
+
+    $('#min-start-at').value = this.minStartAt
+    $('#max-end-at').value = this.maxEndAt ? this.maxEndAt : ''
   }
 
   updateSiteMarker (site) {
@@ -193,42 +214,49 @@ class Hub {
     hide(this.showSitesPane)
     show(this.calculatingPathsPanel)
 
-    this.rideDurations.updateForSites(this.sites).then(() => {
-      // Collect and convert relevant sites
-      const sites = []
-      for (const site of this.sites) {
-        if (site.visit === Site.VISIT_NEVER) {
-          continue
-        }
-
-        sites.push({
-          name: site.name,
-          rideDuration: {},
-          duties: site.duties,
-          serviceTime: `${site.serviceTimeMinutes}m`,
-          mustVisit: site.visit === Site.VISIT_ALWAYS
-        })
-      }
-
-      // Fill in ride duration information
-      for (const origin of sites) {
-        for (const destination of sites) {
-          const ride = this.rideDurations.get(origin, destination)
-          if (ride) {
-            origin.rideDurations[destination.name] = ride
-          }
-        }
-      }
-
-      const world = {
-        sites,
-        // TODO: allow a way to actually fill in these fields
-        start_in_one_of: sites[0].name,
-        min_start_at: '00:00',
-        max_end_at: null,
-        max_tested_extensions: 10
-      }
+    this.rideDurations.updateForSites(this.sites).then(() =>
+      postApi('/api/calculate-paths', this.prepareCalculationWorld())
+    ).then(paths => {
+      console.log(paths)
     })
+  }
+
+  prepareCalculationWorld () {
+    // Collect and convert relevant sites
+    const sites = []
+    for (const site of this.sites) {
+      if (site.visit === Site.VISIT_NEVER) {
+        continue
+      }
+
+      sites.push({
+        name: site.name,
+        latitude: site.latitude,
+        longitude: site.longitude,
+        rideDurations: {},
+        duties: site.duties,
+        serviceTime: `${site.serviceTimeMinutes}m`,
+        mustVisit: site.visit === Site.VISIT_ALWAYS,
+        canStartHere: site.canStartHere
+      })
+    }
+
+    // Fill in ride duration information
+    for (const origin of sites) {
+      for (const destination of sites) {
+        const ride = this.rideDurations.get(origin, destination)
+        if (ride) {
+          origin.rideDurations[destination.name] = ride
+        }
+      }
+    }
+
+    return {
+      sites,
+      minStartAt: this.minStartAt,
+      maxEndAt: this.maxEndAt,
+      maxTestedExtensions: 10
+    }
   }
 
   static loadStorage () {
@@ -258,9 +286,12 @@ class Hub {
         longitude: site.longitude,
         serviceTimeMinutes: site.serviceTimeMinutes,
         visit: site.visit,
-        duties: site.duties
+        duties: site.duties,
+        canStartHere: site.canStartHere
       })),
-      rideDurations: this.rideDurations.toJSON()
+      rideDurations: this.rideDurations.toJSON(),
+      minStartAt: this.minStartAt,
+      maxEndAt: this.maxEndAt
     }
 
     window.localStorage.setItem('hub-data', JSON.stringify(data))

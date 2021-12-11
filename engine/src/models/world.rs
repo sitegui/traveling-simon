@@ -7,10 +7,10 @@ use std::ops::Index;
 #[derive(Debug, Clone)]
 pub struct World {
     pub sites: Vec<Site>,
-    pub start_in_one_of: BTreeSet<SiteId>,
     pub min_start_at: Timestamp,
     pub max_end_at: Option<Timestamp>,
     pub ride_matrix: RideMatrix,
+    pub must_visit: BTreeSet<SiteId>,
     // Heuristics parametrization
     /// The maximum number of extensions to test from each base path during the initial build phase
     pub max_tested_extensions: i32,
@@ -29,17 +29,18 @@ impl World {
             }
         }
 
+        let sites: Vec<_> = input
+            .sites
+            .into_iter()
+            .map(|site| Site::try_from_json(&sites, site))
+            .try_collect()?;
         Ok(World {
-            sites: input
-                .sites
-                .into_iter()
-                .map(|site| Site::try_from_json(&sites, site))
-                .try_collect()?,
-            start_in_one_of: input
-                .start_in_one_of
-                .into_iter()
-                .map(|el| sites.get(&el))
-                .try_collect()?,
+            must_visit: sites
+                .iter()
+                .filter(|site| site.must_visit)
+                .map(|site| site.id)
+                .collect(),
+            sites,
             min_start_at: input.min_start_at,
             max_end_at: input.max_end_at,
             ride_matrix,

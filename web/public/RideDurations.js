@@ -1,3 +1,5 @@
+/* globals postApi */
+
 class RideDurations {
   constructor () {
     // Store resulting as matrix[fromLatLngToLatLng], where the keys are the string representation of the segment
@@ -51,24 +53,18 @@ class RideDurations {
   }
 
   async _update (origins, destinations) {
-    const response = await fetch('/api/ride-durations', {
-      method: 'POST',
-      body: JSON.stringify({
-        origins: origins.map(origin => ({
-          latitude: origin.latitude,
-          longitude: origin.longitude
-        })),
-        destinations: destinations.map(destination => ({
-          latitude: destination.latitude,
-          longitude: destination.longitude
-        }))
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
+    const body = {
+      origins: origins.map(origin => ({
+        latitude: origin.latitude,
+        longitude: origin.longitude
+      })),
+      destinations: destinations.map(destination => ({
+        latitude: destination.latitude,
+        longitude: destination.longitude
+      }))
+    }
 
-    const matrix = (await response.json()).rideDurations
+    const matrix = (await postApi('/api/ride-durations', body)).rideDurations
 
     for (const [i, origin] of origins.entries()) {
       for (const [j, destination] of destinations.entries()) {

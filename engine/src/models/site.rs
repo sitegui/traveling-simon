@@ -8,6 +8,7 @@ pub struct Site {
     pub duties: Vec<BoundedTimeWindow>,
     pub service_time: Duration,
     pub must_visit: bool,
+    pub can_start_here: bool,
 }
 
 impl Site {
@@ -18,6 +19,7 @@ impl Site {
             duties: input.duties,
             service_time: input.service_time,
             must_visit: input.must_visit,
+            can_start_here: input.can_start_here,
         })
     }
 
