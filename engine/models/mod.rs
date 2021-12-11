@@ -2,6 +2,7 @@ mod capped;
 mod duration;
 mod ids;
 pub mod input;
+pub mod output;
 mod path;
 mod path_cost;
 mod point;

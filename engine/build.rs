@@ -20,6 +20,13 @@ pub fn build(world: &World) -> PathBag {
     finished_paths
 }
 
+#[derive(Debug)]
+struct ExtensionInfo {
+    site: SiteId,
+    duty: Option<BoundedTimeWindow>,
+    earliest_service_start: Timestamp,
+}
+
 fn build_iteration(world: &World, finished_paths: &mut PathBag, base_paths: PathBag) -> PathBag {
     let mut new_bag = PathBag::new();
 
@@ -41,13 +48,6 @@ fn build_iteration(world: &World, finished_paths: &mut PathBag, base_paths: Path
 /// end. Returns `true` if at least one new path was inserted into the resulting bag.
 fn extend_path(world: &World, base_path: &Path, sink: &mut PathBag) -> bool {
     let (end_in, end_at) = base_path.end();
-
-    #[derive(Debug)]
-    struct ExtensionInfo {
-        site: SiteId,
-        duty: Option<BoundedTimeWindow>,
-        earliest_service_start: Timestamp,
-    }
 
     // Collect all possible extensions
     let mut extensions = vec![];
@@ -110,6 +110,13 @@ fn extend_path(world: &World, base_path: &Path, sink: &mut PathBag) -> bool {
         new_stops.pop();
 
         if let Some(new_path) = new_path {
+            if let Some(max_end_at) = world.max_end_at {
+                if new_path.end().1 > max_end_at {
+                    log::debug!("Ignore path {} that ends too late", new_path);
+                    continue;
+                }
+            }
+
             changed |= sink.add(new_path);
         }
     }

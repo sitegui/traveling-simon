@@ -1,10 +1,10 @@
 use crate::models::*;
 use anyhow::{ensure, Result};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::fmt;
 
 /// A non-empty time window, bounded in both sides
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub struct BoundedTimeWindow {
     /// Inclusive
     start: Timestamp,
@@ -24,14 +24,6 @@ pub struct RightBoundedTimeWindow {
 
 #[derive(Debug, Clone, Copy)]
 pub struct UnboundedTimeWindow;
-
-#[derive(Debug, Clone, Copy)]
-pub enum TimeWindow {
-    Bounded(BoundedTimeWindow),
-    LeftBounded(LeftBoundedTimeWindow),
-    RightBounded(RightBoundedTimeWindow),
-    Unbounded(UnboundedTimeWindow),
-}
 
 impl BoundedTimeWindow {
     pub fn try_new(start: Timestamp, end: Timestamp) -> Result<Self> {
@@ -72,14 +64,19 @@ impl fmt::Display for UnboundedTimeWindow {
     }
 }
 
-impl fmt::Display for TimeWindow {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            TimeWindow::Bounded(tw) => tw.fmt(f),
-            TimeWindow::LeftBounded(tw) => tw.fmt(f),
-            TimeWindow::RightBounded(tw) => tw.fmt(f),
-            TimeWindow::Unbounded(tw) => tw.fmt(f),
+impl<'de> Deserialize<'de> for BoundedTimeWindow {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct Helper {
+            start: Timestamp,
+            end: Timestamp,
         }
+
+        let helper = Helper::deserialize(deserializer)?;
+        BoundedTimeWindow::try_new(helper.start, helper.end).map_err(serde::de::Error::custom)
     }
 }
 

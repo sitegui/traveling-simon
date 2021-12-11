@@ -7,7 +7,6 @@ pub struct World {
     pub sites: Vec<Site>,
     pub start_in_one_of: BTreeSet<String>,
     pub min_start_at: Timestamp,
-    pub end_in_one_of: BTreeSet<String>,
     pub max_end_at: Option<Timestamp>,
     pub max_tested_extensions: i32,
 }
