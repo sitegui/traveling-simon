@@ -7,10 +7,6 @@ if (!GOOGLE_API_KEY) {
   throw new Error('Missing GOOGLE_API_KEY')
 }
 
-router.get('/', function (req, res) {
-  res.render('index', { title: 'Express' })
-})
-
 // Receives an object like:
 // {sites: {name: String, latitude: Number, longitude: Number}]}
 // and returns an object like:

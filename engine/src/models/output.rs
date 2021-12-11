@@ -3,6 +3,7 @@ use crate::models::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Path {
     pub start_in: String,
     pub start_at: Timestamp,
@@ -11,6 +12,7 @@ pub struct Path {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Stop {
     pub site: String,
     pub duty: Option<BoundedTimeWindow>,

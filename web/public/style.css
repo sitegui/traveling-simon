@@ -1,8 +1,9 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+#map {
+  height: 600px;
 }
 
-a {
-  color: #00B7FF;
+@media (max-width: 768px) {
+  #map {
+    height: 400px;
+  }
 }

@@ -4,6 +4,7 @@ use std::cmp::{Ordering, Reverse};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PathCost {
     pub total_ride: Duration,
     pub total_time: Duration,

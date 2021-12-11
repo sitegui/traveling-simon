@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct World {
     pub sites: Vec<Site>,
     pub start_in_one_of: BTreeSet<String>,
@@ -12,6 +13,7 @@ pub struct World {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Site {
     pub name: String,
     pub ride_durations: BTreeMap<String, Duration>,
