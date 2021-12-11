@@ -35,6 +35,19 @@ class Hub {
       this.removeSite()
     }
 
+    // Reload persisted data
+    const data = Hub.loadStorage()
+    if (data) {
+      for (const dataSite of data.sites) {
+        const site = new Site(dataSite.name, dataSite.latitude, dataSite.longitude)
+        site.visit = dataSite.visit
+        site.serviceTimeMinutes = dataSite.serviceTimeMinutes
+        site.duties = dataSite.duties
+        this.updateSiteMarker(site)
+        this.sites.push(site)
+      }
+    }
+
     this.showSites()
   }
 
@@ -44,6 +57,7 @@ class Hub {
     this.sites.push(site)
     this.updateSiteMarker(site)
     this.editSite(site)
+    this.persistStorage()
   }
 
   editSite (site) {
@@ -103,6 +117,7 @@ class Hub {
     }
     this.updateSiteMarker(this.editingSite)
 
+    this.persistStorage()
     this.showSites()
   }
 
@@ -156,5 +171,39 @@ class Hub {
     result.id = null
     show(result)
     return result
+  }
+
+  static loadStorage () {
+    const dataString = window.localStorage.getItem('hub-data')
+    if (!dataString) {
+      return
+    }
+
+    try {
+      const data = JSON.parse(dataString)
+      if (data.version !== 1) {
+        console.error(`Could not load from storage: invalid version ${data.version}`)
+        return
+      }
+      return data
+    } catch (e) {
+      console.error('Failed to parse JSON from storage')
+    }
+  }
+
+  persistStorage () {
+    const data = {
+      version: 1,
+      sites: this.sites.map(site => ({
+        name: site.name,
+        latitude: site.latitude,
+        longitude: site.longitude,
+        serviceTimeMinutes: site.serviceTimeMinutes,
+        visit: site.visit,
+        duties: site.duties
+      }))
+    }
+
+    window.localStorage.setItem('hub-data', JSON.stringify(data))
   }
 }
