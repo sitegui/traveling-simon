@@ -315,7 +315,7 @@ class Hub {
       stepEl.classList.add('step')
       $('.step-time', stepEl).textContent = time
       $('.step-text', stepEl).textContent = text
-      pathStepsEl.insertBefore(stepEl, pathStepsEl.firstChild)
+      pathStepsEl.appendChild(stepEl)
     }
   }
 
