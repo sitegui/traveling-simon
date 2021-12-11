@@ -14,8 +14,8 @@ class Hub {
 
     this.map.on('click', event => this.addSite(event.latlng.lat, event.latlng.lng))
 
-    this.emptyPane = $('#options-empty')
-    this.editPane = $('#options-edit-site')
+    this.showSitesPane = $('#options-show-sites')
+    this.editSitePane = $('#options-edit-site')
 
     // Start edit-site pane
     $('#site-duty-add').onclick = event => {
@@ -48,10 +48,10 @@ class Hub {
 
   editSite (site) {
     this.editingSite = site
-    show(this.editPane)
-    hide(this.emptyPane)
+    show(this.editSitePane)
+    hide(this.showSitesPane)
     for (const otherSite of this.sites) {
-      otherSite.marker.setOpacity(otherSite === site ? 1.0 : 0.75)
+      otherSite.marker.setOpacity(otherSite === site ? 1.0 : 0.5)
     }
 
     // Fill in the form
@@ -67,11 +67,8 @@ class Hub {
   }
 
   pushDutyRow (start, end) {
-    const dutyTemplate = $('#site-duty-template')
-    const newRow = dutyTemplate.cloneNode(true)
-    newRow.id = String(Math.random())
+    const newRow = this.cloneTemplate($('#site-duty-template'))
     newRow.classList.add('site-duty')
-    show(newRow)
     const addRowEl = $('#site-duty-add-row')
     addRowEl.parentElement.insertBefore(newRow, addRowEl)
 
@@ -111,10 +108,25 @@ class Hub {
 
   showSites () {
     this.editingSite = null
-    hide(this.editPane)
-    show(this.emptyPane)
+    hide(this.editSitePane)
+    show(this.showSitesPane)
+
+    for (const el of $$('.site', this.showSitesPane)) {
+      el.remove()
+    }
+
+    const rowTemplate = $('#site-template')
     for (const site of this.sites) {
       site.marker.setOpacity(1.0)
+      const row = this.cloneTemplate(rowTemplate)
+      row.classList.add('site')
+      $('.site-name', row).textContent = site.name
+      $('.site-visit', row).textContent = site.visit
+      $('.site-duties', row).textContent = site.duties.length
+      $('.site-edit', row).onclick = () => {
+        this.editSite(site)
+      }
+      $('.sites', this.showSitesPane).appendChild(row)
     }
   }
 
@@ -137,5 +149,12 @@ class Hub {
     }).addTo(this.map)
     marker.on('click', event => this.editSite(site))
     site.marker = marker
+  }
+
+  cloneTemplate (template) {
+    const result = template.cloneNode(true)
+    result.id = null
+    show(result)
+    return result
   }
 }

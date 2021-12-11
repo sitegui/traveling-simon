@@ -29,8 +29,26 @@
             <div id="map"></div>
         </div>
         <div class="col-lg-4 p-3">
-            <div id="options-empty">
-                <p>Start by moving and clicking the map to add new stops</p>
+            <div id="options-show-sites">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Visit</th>
+                        <th scope="col">Duties</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody class="sites">
+                    <tr id="site-template" class="d-none">
+                        <th scope="row" class="site-name"></th>
+                        <td class="site-visit"></td>
+                        <td class="site-duties"><td>
+                        <td><button class="btn btn-sm btn-primary site-edit">Edit</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p>Click on the map to add new sites</p>
             </div>
             <div id="options-edit-site" class="d-none">
                 <form>
