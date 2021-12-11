@@ -44,8 +44,10 @@
                     <tr id="site-template" class="d-none">
                         <th scope="row" class="site-name"></th>
                         <td class="site-visit"></td>
-                        <td class="site-duties"><td>
-                        <td><button class="btn btn-sm btn-primary site-edit">Edit</button></td>
+                        <td class="site-duties"></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary site-edit">Edit</button>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
@@ -60,7 +62,9 @@
                     <div class="col-sm-8"><input class="form-control" id="max-end-at" type="time" step="60"></div>
                     <div class="form-text">The latest date to end the path. Leave blank for no restriction</div>
                 </div>
-                <p><button class="btn btn-primary" id="calculate-paths">Calculate paths</button></p>
+                <p>
+                    <button class="btn btn-primary" id="calculate-paths">Calculate paths</button>
+                </p>
             </div>
             <div id="edit-site-pane" class="d-none">
                 <h2 class="mb-2">Edit site</h2>
@@ -112,7 +116,9 @@
                         <tr id="site-duty-template" class="d-none">
                             <td><input class="form-control" id="site-duty-start" type="time" step="60"></td>
                             <td><input class="form-control" id="site-duty-end" type="time" step="60"></td>
-                            <td><button class="btn btn-sm btn-danger" id="site-duty-remove">Remove</button></td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" id="site-duty-remove">Remove</button>
+                            </td>
                         </tr>
                         <tr id="site-duty-add-row">
                             <td colspan="3">
@@ -131,6 +137,38 @@
                 <div class="spinner-border" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
+            </div>
+            <div id="show-paths-pane" class="d-none">
+                <h2 class="mb-2">Calculated paths</h2>
+                <p>Click on the paths below to see more details</p>
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">Total ride</th>
+                        <th scope="col">Total time</th>
+                        <th scope="col">Stops on duty</th>
+                        <th scope="col">Stops</th>
+                    </tr>
+                    </thead>
+                    <tbody class="paths">
+                    <tr id="path-template" class="d-none" style="cursor: pointer">
+                        <td class="path-total-ride"></td>
+                        <td class="path-total-time"></td>
+                        <td class="path-stops-on-duty"></td>
+                        <td class="path-stops"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="detailed-path d-none">
+                    <p>Detailed path</p>
+                    <ul class="path-steps list-group">
+                        <li class="list-group-item d-none" id="step-template">
+                            <span class="badge rounded-pill bg-secondary step-time"></span>
+                            <span class="step-text"></span>
+                        </li>
+                    </ul>
+                </div>
+                <button class="btn btn-secondary back m-2">Back</button>
             </div>
         </div>
     </div>

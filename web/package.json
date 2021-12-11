@@ -13,6 +13,7 @@
     "standard": "^16.0.4"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "compile-engine": "cd ../engine && cargo build --release && mkdir -p ../data && cp ./target/release/traveling-simon ../data/"
   }
 }
