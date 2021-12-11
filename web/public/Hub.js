@@ -1,10 +1,11 @@
-/* global $, $$, L, Site, show, hide */
+/* global $, $$, L, Site, show, hide, RideDurations */
 
 class Hub {
   constructor (el) {
     this.map = L.map($('#map')).setView([47.4645927, -0.5583979], 12)
     this.sites = []
     this.editingSite = null
+    this.rideDurations = new RideDurations()
 
     // eslint-disable-next-line no-template-curly-in-string
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -14,15 +15,16 @@ class Hub {
 
     this.map.on('click', event => this.addSite(event.latlng.lat, event.latlng.lng))
 
-    this.showSitesPane = $('#options-show-sites')
-    this.editSitePane = $('#options-edit-site')
+    this.showSitesPane = $('#show-sites-pane')
+    this.editSitePane = $('#edit-site-pane')
+    this.calculatingPathsPanel = $('#calculating-paths-pane')
 
     // Start edit-site pane
     $('#site-duty-add').onclick = event => {
       event.preventDefault()
       this.pushDutyRow('', '')
     }
-    $('#options-edit-site form').onsubmit = event => {
+    $('#edit-site-pane form').onsubmit = event => {
       event.preventDefault()
       this.saveSite()
     }
@@ -33,6 +35,11 @@ class Hub {
     $('#site-remove').onclick = event => {
       event.preventDefault()
       this.removeSite()
+    }
+
+    // Start show-sites pane
+    $('#calculate-paths').onclick = () => {
+      this.calculatePaths()
     }
 
     // Reload persisted data
@@ -46,6 +53,7 @@ class Hub {
         this.updateSiteMarker(site)
         this.sites.push(site)
       }
+      this.rideDurations = RideDurations.fromJSON(data.rideDurations)
     }
 
     this.showSites()
@@ -64,6 +72,7 @@ class Hub {
     this.editingSite = site
     show(this.editSitePane)
     hide(this.showSitesPane)
+    hide(this.calculatingPathsPanel)
     for (const otherSite of this.sites) {
       otherSite.marker.setOpacity(otherSite === site ? 1.0 : 0.5)
     }
@@ -71,7 +80,7 @@ class Hub {
     // Fill in the form
     $('#site-name').value = site.name
     $('#site-service-time').value = String(site.serviceTimeMinutes)
-    $('#options-edit-site form')['site-visit'].value = site.visit
+    $('#edit-site-pane form')['site-visit'].value = site.visit
     for (const el of $$('tr.site-duty')) {
       el.remove()
     }
@@ -106,7 +115,7 @@ class Hub {
   saveSite () {
     this.editingSite.name = $('#site-name').value
     this.editingSite.serviceTimeMinutes = Number.parseInt($('#site-service-time').value)
-    this.editingSite.visit = $('#options-edit-site form')['site-visit'].value
+    this.editingSite.visit = $('#edit-site-pane form')['site-visit'].value
     this.editingSite.duties = []
     for (const row of $$('tr.site-duty')) {
       const start = $('#site-duty-start', row).value
@@ -125,6 +134,7 @@ class Hub {
     this.editingSite = null
     hide(this.editSitePane)
     show(this.showSitesPane)
+    hide(this.calculatingPathsPanel)
 
     for (const el of $$('.site', this.showSitesPane)) {
       el.remove()
@@ -173,6 +183,14 @@ class Hub {
     return result
   }
 
+  calculatePaths () {
+    hide(this.editSitePane)
+    hide(this.showSitesPane)
+    show(this.calculatingPathsPanel)
+
+    this.rideDurations.updateForSites(this.sites)
+  }
+
   static loadStorage () {
     const dataString = window.localStorage.getItem('hub-data')
     if (!dataString) {
@@ -201,7 +219,8 @@ class Hub {
         serviceTimeMinutes: site.serviceTimeMinutes,
         visit: site.visit,
         duties: site.duties
-      }))
+      })),
+      rideDurations: this.rideDurations.toJSON()
     }
 
     window.localStorage.setItem('hub-data', JSON.stringify(data))

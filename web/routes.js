@@ -8,19 +8,19 @@ if (!GOOGLE_API_KEY) {
 }
 
 // Receives an object like:
-// {sites: {name: String, latitude: Number, longitude: Number}]}
+// {origins: {latitude: Number, longitude: Number}], destinations: {latitude: Number, longitude: Number}]}
 // and returns an object like:
-// {sites: [{name: String, rideDurations: {$name: String}}]}
+// {rideDurations: [[String]]}
 router.post('/api/ride-durations', async (req, res, next) => {
   try {
     // Format like expected by Google's API:
-    console.log(req.body)
-    const sites = req.body.sites.map(site => `${site.latitude},${site.longitude}`).join('|')
+    const origins = req.body.origins.map(origin => `${origin.latitude},${origin.longitude}`).join('|')
+    const destinations = req.body.destinations.map(destination => `${destination.latitude},${destination.longitude}`).join('|')
 
     const answer = await axios.get('https://maps.googleapis.com/maps/api/distancematrix/json', {
       params: {
-        destinations: sites,
-        origins: sites,
+        destinations,
+        origins,
         key: GOOGLE_API_KEY
       }
     })
@@ -29,21 +29,21 @@ router.post('/api/ride-durations', async (req, res, next) => {
       throw new Error(`Got unexpected status: ${answer.data.status}`)
     }
 
-    const convertRow = (row, i) => {
-      const rideDurations = {}
-      for (const [j, element] of row.elements.entries()) {
-        if (i !== j && element.status === 'OK') {
-          rideDurations[req.body.sites[j].name] = formatDuration(element.duration.value, 300)
+    const rideDurations = []
+    for (const row of answer.data.rows) {
+      const subRideDurations = []
+      for (const element of row.elements) {
+        if (element.status === 'OK') {
+          subRideDurations.push(formatDuration(element.duration.value, 300))
+        } else {
+          subRideDurations.push(null)
         }
       }
-      return {
-        name: req.body.sites[i].name,
-        rideDurations
-      }
+      rideDurations.push(subRideDurations)
     }
 
     res.json({
-      sites: answer.data.rows.map(convertRow)
+      rideDurations
     })
   } catch (error) {
     next(error)

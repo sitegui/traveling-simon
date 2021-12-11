@@ -29,7 +29,7 @@
             <div id="map"></div>
         </div>
         <div class="col-lg-4 p-3">
-            <div id="options-show-sites">
+            <div id="show-sites-pane">
                 <table class="table">
                     <thead>
                     <tr>
@@ -49,8 +49,9 @@
                     </tbody>
                 </table>
                 <p>Click on the map to add new sites</p>
+                <p><button class="btn btn-primary" id="calculate-paths">Calculate paths</button></p>
             </div>
-            <div id="options-edit-site" class="d-none">
+            <div id="edit-site-pane" class="d-none">
                 <form>
                     <h2 class="mb-2">Edit site</h2>
                     <div class="mb-2 row g-2">
@@ -110,8 +111,11 @@
                     <button class="btn btn-danger" id="site-remove">Remove</button>
                 </form>
             </div>
-            <div id="options-solve" class="d-none">
-
+            <div id="calculating-paths-pane" class="d-none">
+                <p>Calculating paths</p>
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -124,6 +128,7 @@
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
         integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
         crossorigin=""></script>
+<script src="/RideDurations.js"></script>
 <script src="/Site.js"></script>
 <script src="/Hub.js"></script>
 <script src="/script.js"></script>
