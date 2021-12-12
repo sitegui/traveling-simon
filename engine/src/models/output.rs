@@ -1,5 +1,6 @@
 use crate::models;
 use crate::models::*;
+use crate::path_bag::PathBagItem;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -9,6 +10,7 @@ pub struct Path {
     pub start_at: Timestamp,
     pub stops: Vec<Stop>,
     pub cost: PathCost,
+    pub is_dominated: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -23,7 +25,8 @@ pub struct Stop {
 }
 
 impl Path {
-    pub fn new(world: &World, path: &models::Path) -> Self {
+    pub fn new(world: &World, item: &PathBagItem) -> Self {
+        let path = &item.path;
         Path {
             start_in: world[path.start_in].name.clone(),
             start_at: path.start_at,
@@ -33,6 +36,7 @@ impl Path {
                 .map(|stop| Stop::new(world, stop))
                 .collect(),
             cost: path.cost,
+            is_dominated: item.dominated_by > 0,
         }
     }
 }

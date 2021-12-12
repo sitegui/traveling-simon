@@ -65,6 +65,10 @@ class Hub {
     $('.back', this.showPathsPane).onclick = () => {
       this.showSites()
     }
+    $('.path-alternatives', this.showPathsPane).onclick = () => {
+      hide($('.path-alternatives', this.showPathsPane))
+      $$('.path-is-dominated', this.showPathsPane).forEach(show)
+    }
 
     // Reload persisted data
     const data = Hub.loadStorage()
@@ -246,10 +250,13 @@ class Hub {
     }
 
     let activeRow = null
+    let hasAlternative = false
     const template = $('#path-template')
     for (const path of paths) {
       const row = this.cloneTemplate(template)
       row.classList.add('path')
+      row.classList.toggle('path-is-dominated', path.isDominated)
+      row.classList.toggle('d-none', path.isDominated)
       $('.path-total-ride', row).textContent = path.cost.totalRide
       $('.path-total-time', row).textContent = path.cost.totalTime
       $('.path-stops-on-duty', row).textContent = path.cost.stopsOnDuty
@@ -263,9 +270,14 @@ class Hub {
         this.showPath(path)
       }
       $('.paths', this.showPathsPane).appendChild(row)
+
+      if (path.isDominated) {
+        hasAlternative = true
+      }
     }
 
     hide($('.detailed-path', this.showPathsPane))
+    $('.path-alternatives', this.showPathsPane).classList.toggle('d-none', !hasAlternative)
   }
 
   showPath (path) {
@@ -353,7 +365,9 @@ class Hub {
       sites,
       minStartAt: this.minStartAt,
       maxEndAt: this.maxEndAt,
-      maxTestedExtensions: 10
+      maxTestedExtensions: 10,
+      maxBagItems: 100,
+      maxResults: 10
     }
   }
 

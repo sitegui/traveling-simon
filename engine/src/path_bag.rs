@@ -7,17 +7,17 @@ use std::collections::BTreeMap;
 /// This means that each path is not strictly better than any other paths
 #[derive(Debug, Clone)]
 pub struct PathBag {
-    items: Vec<Item>,
+    items: Vec<PathBagItem>,
     max_items: usize,
 }
 
 #[derive(Debug, Clone)]
-struct Item {
-    path: Path,
+pub struct PathBagItem {
+    pub path: Path,
     // How many paths have greater cost
-    dominates: i32,
+    pub dominates: i32,
     // How many paths have smaller cost
-    dominated_by: i32,
+    pub dominated_by: i32,
 }
 
 impl PathBag {
@@ -32,8 +32,14 @@ impl PathBag {
         self.items.into_iter().map(|item| item.path)
     }
 
+    pub fn into_sorted_paths(mut self) -> impl Iterator<Item = PathBagItem> {
+        // Greater scores first
+        self.items.sort_by_key(|item| Reverse(item.score()));
+        self.items.into_iter()
+    }
+
     pub fn add(&mut self, new_path: Path) {
-        let mut new_item = Item {
+        let mut new_item = PathBagItem {
             path: new_path,
             dominates: 0,
             dominated_by: 0,
@@ -56,7 +62,7 @@ impl PathBag {
                 _ => {}
             }
 
-            let score = (Reverse(item.dominated_by), item.dominates);
+            let score = item.score();
             if score < worst_score {
                 worst_score = score;
                 worst_index = i;
@@ -64,7 +70,7 @@ impl PathBag {
         }
 
         // Insert new path
-        let new_score = (Reverse(new_item.dominated_by), new_item.dominates);
+        let new_score = new_item.score();
         if new_score < worst_score {
             worst_index = self.items.len();
         }
@@ -104,6 +110,12 @@ impl PathBag {
                 .or_default() += 1;
         }
         result
+    }
+}
+
+impl PathBagItem {
+    fn score(&self) -> (Reverse<i32>, i32) {
+        (Reverse(self.dominated_by), self.dominates)
     }
 }
 
