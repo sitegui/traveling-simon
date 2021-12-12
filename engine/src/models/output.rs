@@ -22,6 +22,9 @@ pub struct Stop {
     pub ride_end: Timestamp,
     pub service_start: Timestamp,
     pub service_end: Timestamp,
+    pub ride: Duration,
+    pub wait: Duration,
+    pub service: Duration,
 }
 
 impl Path {
@@ -50,6 +53,9 @@ impl Stop {
             ride_end: stop.ride_end,
             service_start: stop.service_start,
             service_end: stop.service_end,
+            ride: stop.ride_end - stop.ride_start,
+            wait: stop.service_start - stop.ride_end,
+            service: stop.service_end - stop.service_start,
         }
     }
 }

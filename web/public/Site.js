@@ -4,7 +4,7 @@ class Site {
     this.latitude = latitude
     this.longitude = longitude
     this.marker = null
-    this.serviceTimeMinutes = 5
+    this.serviceTimeMinutes = 15
     this.visit = Site.VISIT_ALWAYS
     this.duties = []
     this.canStartHere = false

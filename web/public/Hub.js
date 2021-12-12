@@ -53,7 +53,7 @@ class Hub {
     }
 
     // Start show-sites pane
-    $('#calculate-paths').onclick = () => {
+    $('.calculate-paths', this.showSitesPane).onclick = () => {
       this.calculatePaths()
     }
     $('#min-start-at').oninput = event => {
@@ -137,6 +137,7 @@ class Hub {
     this.sites.push(site)
     this.updateSiteMarker(site)
     this.editSite(site)
+    $('#site-name').select()
     this.persistStorage()
   }
 
@@ -244,7 +245,7 @@ class Hub {
       const row = this.cloneTemplate(rowTemplate)
       row.classList.add('site')
       $('.site-name', row).textContent = site.name
-      $('.site-visit', row).textContent = site.visit === Site.VISIT_ALWAYS ? 'Always' : (site.visit === Site.VISIT_MAYBE ? 'Maybe' : 'Never')
+      $('.site-visit', row).textContent = site.visit === Site.VISIT_ALWAYS ? 'Yes' : (site.visit === Site.VISIT_MAYBE ? 'Maybe' : 'No')
       let duties
       if (site.duties.length === 0) {
         duties = '-'
@@ -261,6 +262,11 @@ class Hub {
 
     $('#min-start-at').value = this.minStartAt
     $('#max-end-at').value = this.maxEndAt ? this.maxEndAt : ''
+
+    const empty = this.sites.length === 0
+    $('.sites-list', this.showSitesPane).classList.toggle('d-none', empty)
+    $('.sites-list-empty', this.showSitesPane).classList.toggle('d-none', !empty)
+    $('.calculate-paths', this.showSitesPane).disabled = empty
   }
 
   updateSiteMarker (site) {
@@ -318,15 +324,16 @@ class Hub {
     let activeRow = null
     let moreAlternatives = 0
     const template = $('#path-template')
+    let firstRow = null
     for (const path of paths) {
       const row = this.cloneTemplate(template)
       row.classList.add('path')
       row.classList.toggle('path-is-dominated', path.isDominated)
       row.classList.toggle('d-none', path.isDominated)
       $('.path-total-ride', row).textContent = path.cost.totalRide
-      $('.path-total-time', row).textContent = path.cost.totalTime
-      $('.path-stops-on-duty', row).textContent = path.cost.stopsOnDuty
-      $('.path-stops', row).textContent = path.cost.stops
+      const lastStop = path.stops[path.stops.length - 1]
+      $('.path-total-time', row).textContent = `${path.startAt} - ${lastStop.serviceEnd} (${path.cost.totalTime})`
+      $('.path-stops', row).textContent = `${path.cost.stops} (${path.cost.stopsOnDuty} in shifts)`
       row.onclick = () => {
         if (activeRow) {
           activeRow.classList.remove('table-active')
@@ -340,6 +347,10 @@ class Hub {
       if (path.isDominated) {
         moreAlternatives += 1
       }
+
+      if (firstRow === null) {
+        firstRow = row
+      }
     }
 
     hide($('.detailed-path', this.showPathsPane))
@@ -350,6 +361,13 @@ class Hub {
       show(moreAlternativesEl)
       moreAlternativesEl.textContent = `Show ${moreAlternatives} more alternative${moreAlternatives === 1 ? '' : 's'}`
     }
+
+    const empty = firstRow === null
+    if (!empty) {
+      firstRow.click()
+    }
+    $('.paths-list', this.showPathsPane).classList.toggle('d-none', empty)
+    $('.paths-list-empty', this.showPathsPane).classList.toggle('d-none', !empty)
   }
 
   showPath (path) {
@@ -377,15 +395,15 @@ class Hub {
     ]
     for (const stop of path.stops) {
       if (stop.rideStart !== path.startAt) {
-        steps.push([stop.rideStart, `Ride to ${stop.site}`])
+        steps.push([stop.rideStart, `Ride to ${stop.site} in ${stop.ride}`])
       }
       if (stop.duty) {
-        steps.push([stop.rideEnd, `Arrive at ${stop.site}. Duty is from ${stop.duty.start} until ${stop.duty.end}`])
+        steps.push([stop.rideEnd, `Arrive at ${stop.site} for shift ${stop.duty.start} - ${stop.duty.end}`])
       } else {
         steps.push([stop.rideEnd, `Arrive at ${stop.site}`])
       }
       if (stop.serviceStart !== stop.rideEnd) {
-        steps.push([stop.serviceStart, `Wait in ${stop.site} for duty start`])
+        steps.push([stop.serviceStart, `Wait ${stop.wait} for shift start`])
       }
     }
 

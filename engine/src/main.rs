@@ -26,6 +26,7 @@ fn main() -> Result<()> {
     // Print answers
     let answer = built
         .into_sorted_paths()
+        .filter(|item| !item.path.stops.is_empty())
         .map(|item| output::Path::new(&world, &item))
         .take(world.max_results)
         .collect_vec();

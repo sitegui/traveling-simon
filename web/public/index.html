@@ -34,39 +34,43 @@
         </div>
         <div class="col-lg-4 p-3">
             <div id="show-sites-pane">
-                <h2 class="mb-2">Existing sites</h2>
-                <p>Click on a site bellow to modify it</p>
-                <table class="table table-hover">
-                    <thead>
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Visit</th>
-                        <th scope="col">Duties</th>
-                        <th scope="col">Start</th>
-                    </tr>
-                    </thead>
-                    <tbody class="sites">
-                    <tr id="site-template" class="d-none" style="cursor: pointer">
-                        <th scope="row" class="site-name"></th>
-                        <td class="site-visit"></td>
-                        <td class="site-duties" style="white-space: pre-wrap"></td>
-                        <td class="site-start"></td>
-                    </tr>
-                    </tbody>
-                </table>
-                <p>Click on the map to add a new site</p>
+                <h2 class="mb-2">Sites</h2>
+                <div class="sites-list">
+                    <p>Click on a site bellow to modify it or click on the map to add a new one</p>
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Stop here?</th>
+                            <th scope="col">Shifts</th>
+                            <th scope="col">Start here?</th>
+                        </tr>
+                        </thead>
+                        <tbody class="sites">
+                        <tr id="site-template" class="d-none" style="cursor: pointer">
+                            <th scope="row" class="site-name"></th>
+                            <td class="site-visit"></td>
+                            <td class="site-duties" style="white-space: pre-wrap"></td>
+                            <td class="site-start"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="sites-list-empty">Start by clicking on the map to add a new site</p>
+                <h2 class="mb-2">Options</h2>
                 <div class="mb-2 row g-2">
-                    <label class="col-sm-4 col-form-label" for="min-start-at">Start after</label>
+                    <label class="col-sm-4 col-form-label" for="min-start-at">Earliest departure</label>
                     <div class="col-sm-8"><input class="form-control" id="min-start-at" type="time" step="60"></div>
                     <div class="form-text">The earliest date to start the path</div>
                 </div>
                 <div class="mb-2 row g-2">
-                    <label class="col-sm-4 col-form-label" for="max-end-at">Finish before</label>
+                    <label class="col-sm-4 col-form-label" for="max-end-at">Latest arrival</label>
                     <div class="col-sm-8"><input class="form-control" id="max-end-at" type="time" step="60"></div>
                     <div class="form-text">The latest date to end the path. Leave blank for no restriction</div>
                 </div>
+                <hr>
                 <p>
-                    <button class="btn btn-primary" id="calculate-paths">Calculate paths</button>
+                    <button class="btn btn-primary calculate-paths">Calculate paths</button>
                 </p>
             </div>
             <div id="edit-site-pane" class="d-none">
@@ -77,36 +81,43 @@
                         <div class="col-sm-8"><input class="form-control" id="site-name"></div>
                     </div>
                     <div class="mb-2 row g-2">
-                        <label class="col-sm-6 col-form-label" for="site-service-time">Service time</label>
+                        <label class="col-sm-6 col-form-label" for="site-service-time">Stop time</label>
                         <div class="col-sm-6"><input class="form-control" id="site-service-time" type="number" min="0">
                         </div>
-                        <div class="form-text">For long you're expected to visit this site, in minutes</div>
+                        <div class="form-text">How long I stay at this site if I stop here, in minutes</div>
                     </div>
                     <fieldset class="row mb-2">
-                        <legend class="col-form-label col-sm-4">Visit it?</legend>
+                        <legend class="col-form-label col-sm-4">Stop here?</legend>
                         <div class="col-sm-8">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="site-visit" id="site-visit-always"
                                        value="ALWAYS">
-                                <label class="form-check-label" for="site-visit-always">Always</label>
+                                <label class="form-check-label" for="site-visit-always">Yes</label>
+                                <div class="form-text">I must stop at this site</div>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="site-visit" id="site-visit-maybe"
                                        value="MAYBE">
                                 <label class="form-check-label" for="site-visit-maybe">Maybe</label>
+                                <div class="form-text">I prefer to stop at this site, but want to see alternatives</div>
                             </div>
                             <div class="form-check disabled">
                                 <input class="form-check-input" type="radio" name="site-visit" id="site-visit-never"
                                        value="NEVER">
-                                <label class="form-check-label" for="site-visit-never">Never</label>
+                                <label class="form-check-label" for="site-visit-never">No</label>
+                                <div class="form-text">I don't want to stop at this site</div>
                             </div>
                         </div>
                     </fieldset>
                     <div class="mb-2">
                         <input type="checkbox" class="form-check-input" id="site-can-start-here">
-                        <label class="col-form-check-label" for="site-can-start-here">Can start here</label>
+                        <label class="col-form-check-label" for="site-can-start-here">Start here</label>
+                        <div class="form-text">I can start my path here, it's a valid starting position</div>
                     </div>
-                    <div class="mb-2">Duties</div>
+                    <h3 class="mb-2">Working shifts</h3>
+                    <div class="form-text">The periods in which crew members work at this site. I prefer to visit this
+                        site during these periods.
+                    </div>
                     <table class="table">
                         <thead>
                         <tr>
@@ -130,8 +141,10 @@
                         </tr>
                         </tbody>
                     </table>
-                    <button class="btn btn-secondary" id="site-back">Back</button>
-                    <button class="btn btn-danger" id="site-remove">Remove</button>
+                    <div class="m-2">
+                        <button class="btn btn-primary" id="site-back">Save</button>
+                        <button class="btn btn-danger btn-sm" id="site-remove">Remove</button>
+                    </div>
                 </form>
             </div>
             <div id="calculating-paths-pane" class="d-none">
@@ -148,32 +161,34 @@
             </div>
             <div id="show-paths-pane" class="d-none">
                 <h2 class="mb-2">Calculated paths</h2>
-                <p>Click on a path below to see more details</p>
-                <table class="table table-hover">
-                    <thead>
-                    <tr>
-                        <th scope="col">Total ride</th>
-                        <th scope="col">Total time</th>
-                        <th scope="col">Stops on duty</th>
-                        <th scope="col">Stops</th>
-                    </tr>
-                    </thead>
-                    <tbody class="paths">
-                    <tr id="path-template" class="d-none" style="cursor: pointer">
-                        <td class="path-total-ride"></td>
-                        <td class="path-total-time"></td>
-                        <td class="path-stops-on-duty"></td>
-                        <td class="path-stops"></td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div class="paths-list">
+                    <p>Click on another path below to see more details</p>
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col">Duration</th>
+                            <th scope="col">Stops</th>
+                            <th scope="col">Riding</th>
+                        </tr>
+                        </thead>
+                        <tbody class="paths">
+                        <tr id="path-template" class="d-none" style="cursor: pointer">
+                            <td class="path-total-time"></td>
+                            <td class="path-stops"></td>
+                            <td class="path-total-ride"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="paths-list-empty">No path was found. It usually happens because your requirements are too
+                    restrictive and no possible path exists. Remove some restrictions and try again.</p>
                 <p><a href="#" class="path-alternatives"></a></p>
                 <div class="detailed-path d-none">
-                    <p>Detailed path</p>
+                    <h2 class="mb-2">Detailed steps</h2>
                     <ul class="path-steps list-group">
                     </ul>
                     <li class="list-group-item d-none" id="step-template">
-                        <span class="badge rounded-pill bg-secondary step-time"></span>
+                        <span class="step-time fw-bold"></span> -
                         <span class="step-text"></span>
                     </li>
                 </div>
