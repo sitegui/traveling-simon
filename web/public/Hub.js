@@ -75,6 +75,15 @@ class Hub {
       $$('.path-is-dominated', this.showPathsPane).forEach(show)
     }
 
+    // Start calculating-paths pane
+    $('.back', this.calculatingPathsPane).onclick = () => {
+      this.showSites()
+    }
+    $('.show-details', this.calculatingPathsPane).onclick = () => {
+      hide($('.show-details', this.calculatingPathsPane))
+      show($('.error-details', this.calculatingPathsPane))
+    }
+
     // Reload persisted data
     const data = Hub.loadStorage()
     if (data) {
@@ -284,11 +293,19 @@ class Hub {
 
   calculatePaths () {
     this.switchPane('calculatingPaths')
+    show($('.calculating', this.calculatingPathsPane))
+    hide($('.calculation-error', this.calculatingPathsPane))
+    show($('.show-details', this.calculatingPathsPane))
+    hide($('.error-details', this.calculatingPathsPane))
 
     this.rideDurations.updateForSites(this.sites).then(() =>
       postApi('/api/calculate-paths', this.prepareCalculationWorld())
     ).then(paths => {
       this.showPaths(paths)
+    }).catch(error => {
+      hide($('.calculating', this.calculatingPathsPane))
+      show($('.calculation-error', this.calculatingPathsPane))
+      $('.error-details', this.calculatingPathsPane).textContent = error
     })
   }
 

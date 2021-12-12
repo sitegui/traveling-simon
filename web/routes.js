@@ -54,9 +54,12 @@ router.post('/api/ride-durations', async (req, res, next) => {
 // Proxy the call to the engine binary
 router.post('/api/calculate-paths', (req, res, next) => {
   try {
-    const child = child_process.execFile('../data/traveling-simon', (err, stdout, _stderr) => {
+    const child = child_process.execFile('../data/traveling-simon', (err, stdout, stderr) => {
       if (err) {
-        return next(err)
+        res.status(500)
+        return res.json({
+          error: stderr
+        })
       }
 
       res.json(JSON.parse(stdout))

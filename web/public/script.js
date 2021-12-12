@@ -23,7 +23,18 @@ async function postApi (url, body) {
     }
   })
 
-  return response.json()
+  if (response.ok) {
+    return response.json()
+  } else {
+    const contentType = response.headers.get('Content-Type')
+    if (contentType !== null && contentType.includes('application/json')) {
+      const body = await response.json()
+      throw new Error(`API request failed with status ${response.status}:\n${body.error}`)
+    } else {
+      const body = await response.text()
+      throw new Error(`API request failed with status ${response.status}:\n${body}`)
+    }
+  }
 }
 
 window.hub = new Hub()

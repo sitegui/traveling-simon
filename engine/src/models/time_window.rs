@@ -27,7 +27,7 @@ pub struct UnboundedTimeWindow;
 
 impl BoundedTimeWindow {
     pub fn try_new(start: Timestamp, end: Timestamp) -> Result<Self> {
-        ensure!(end > start);
+        ensure!(end >= start);
         Ok(BoundedTimeWindow { start, end })
     }
 

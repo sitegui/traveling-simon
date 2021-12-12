@@ -131,10 +131,16 @@
                 </form>
             </div>
             <div id="calculating-paths-pane" class="d-none">
-                <p>Calculating paths</p>
-                <div class="spinner-border" role="status">
+                <h2>Calculating paths</h2>
+                <div class="spinner-border calculating" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
+                <div class="calculation-error bg-danger p-2 bg-opacity-50">
+                    <div class="m-2">The operation failed</div>
+                    <button class="btn btn-primary back">Back</button>
+                    <button class="btn btn-secondary btn-sm show-details">Show details</button>
+                </div>
+                <pre class="m-2 error-details"></pre>
             </div>
             <div id="show-paths-pane" class="d-none">
                 <h2 class="mb-2">Calculated paths</h2>
