@@ -41,7 +41,7 @@ impl World {
         Ok(World {
             must_visit: sites
                 .iter()
-                .filter(|site| site.must_visit)
+                .filter(|site| site.visit == Visit::Always)
                 .map(|site| site.id)
                 .collect(),
             sites,

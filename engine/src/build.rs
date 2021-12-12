@@ -57,7 +57,7 @@ fn extend_path(world: &World, base_path: &Path, sink: &mut PathBag) {
     let mut extensions = vec![];
     for site in &world.sites {
         // Don't revisit
-        if base_path.visited_sites.contains(&site.id) {
+        if site.visit == Visit::Never || base_path.visited_sites.contains(&site.id) {
             continue;
         }
 

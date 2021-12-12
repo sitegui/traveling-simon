@@ -21,5 +21,5 @@ pub struct Site {
     pub duties: Vec<BoundedTimeWindow>,
     pub service_time: Duration,
     pub can_start_here: bool,
-    pub must_visit: bool,
+    pub visit: Visit,
 }

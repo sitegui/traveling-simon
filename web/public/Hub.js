@@ -244,7 +244,7 @@ class Hub {
       const row = this.cloneTemplate(rowTemplate)
       row.classList.add('site')
       $('.site-name', row).textContent = site.name
-      $('.site-visit', row).textContent = site.visit
+      $('.site-visit', row).textContent = site.visit === Site.VISIT_ALWAYS ? 'Always' : (site.visit === Site.VISIT_MAYBE ? 'Maybe' : 'Never')
       let duties
       if (site.duties.length === 0) {
         duties = '-'
@@ -316,7 +316,7 @@ class Hub {
     }
 
     let activeRow = null
-    let hasAlternative = false
+    let moreAlternatives = 0
     const template = $('#path-template')
     for (const path of paths) {
       const row = this.cloneTemplate(template)
@@ -338,12 +338,18 @@ class Hub {
       $('.paths', this.showPathsPane).appendChild(row)
 
       if (path.isDominated) {
-        hasAlternative = true
+        moreAlternatives += 1
       }
     }
 
     hide($('.detailed-path', this.showPathsPane))
-    $('.path-alternatives', this.showPathsPane).classList.toggle('d-none', !hasAlternative)
+    const moreAlternativesEl = $('.path-alternatives', this.showPathsPane)
+    if (moreAlternatives === 0) {
+      hide(moreAlternativesEl)
+    } else {
+      show(moreAlternativesEl)
+      moreAlternativesEl.textContent = `Show ${moreAlternatives} more alternative${moreAlternatives === 1 ? '' : 's'}`
+    }
   }
 
   showPath (path) {
@@ -401,30 +407,22 @@ class Hub {
     // Collect and convert relevant sites
     const sites = []
     for (const site of this.sites) {
-      if (site.visit === Site.VISIT_NEVER) {
-        continue
+      const rideDurations = {}
+      for (const destination of this.sites) {
+        const ride = this.rideDurations.get(site, destination)
+        if (ride) {
+          rideDurations[destination.name] = ride
+        }
       }
 
       sites.push({
         name: site.name,
-        latitude: site.latitude,
-        longitude: site.longitude,
-        rideDurations: {},
+        rideDurations,
         duties: site.duties,
         serviceTime: `${site.serviceTimeMinutes}m`,
-        mustVisit: site.visit === Site.VISIT_ALWAYS,
+        visit: site.visit,
         canStartHere: site.canStartHere
       })
-    }
-
-    // Fill in ride duration information
-    for (const origin of sites) {
-      for (const destination of sites) {
-        const ride = this.rideDurations.get(origin, destination)
-        if (ride) {
-          origin.rideDurations[destination.name] = ride
-        }
-      }
     }
 
     return {

@@ -1,5 +1,6 @@
 use crate::models::*;
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone)]
 pub struct Site {
@@ -7,8 +8,16 @@ pub struct Site {
     pub name: String,
     pub duties: Vec<BoundedTimeWindow>,
     pub service_time: Duration,
-    pub must_visit: bool,
+    pub visit: Visit,
     pub can_start_here: bool,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum Visit {
+    Always,
+    Maybe,
+    Never,
 }
 
 impl Site {
@@ -18,7 +27,7 @@ impl Site {
             name: input.name,
             duties: input.duties,
             service_time: input.service_time,
-            must_visit: input.must_visit,
+            visit: input.visit,
             can_start_here: input.can_start_here,
         })
     }
@@ -30,7 +39,7 @@ impl Site {
             name: String::new(),
             duties: vec![],
             service_time: Duration::ZERO,
-            must_visit: false,
+            visit: Visit::Always,
             can_start_here: false,
         }
     }

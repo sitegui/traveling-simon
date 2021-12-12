@@ -11,6 +11,6 @@ class Site {
   }
 }
 
-Site.VISIT_ALWAYS = 'always'
-Site.VISIT_MAYBE = 'maybe'
-Site.VISIT_NEVER = 'never'
+Site.VISIT_ALWAYS = 'ALWAYS'
+Site.VISIT_MAYBE = 'MAYBE'
+Site.VISIT_NEVER = 'NEVER'
