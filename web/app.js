@@ -3,7 +3,7 @@ const path = require('path')
 const logger = require('morgan')
 const debug = require('debug')('web')
 const http = require('http')
-const port = 3000
+const port = Number(process.env.PORT || '3000')
 
 const router = require('./routes')
 
