@@ -31,27 +31,26 @@
         <div class="col-lg-4 p-3">
             <div id="show-sites-pane">
                 <h2 class="mb-2">Existing sites</h2>
-                <table class="table">
+                <p>Click on a site bellow to modify it</p>
+                <table class="table table-hover">
                     <thead>
                     <tr>
                         <th scope="col">Name</th>
                         <th scope="col">Visit</th>
                         <th scope="col">Duties</th>
-                        <th scope="col"></th>
+                        <th scope="col">Start</th>
                     </tr>
                     </thead>
                     <tbody class="sites">
-                    <tr id="site-template" class="d-none">
+                    <tr id="site-template" class="d-none" style="cursor: pointer">
                         <th scope="row" class="site-name"></th>
                         <td class="site-visit"></td>
-                        <td class="site-duties"></td>
-                        <td>
-                            <button class="btn btn-sm btn-primary site-edit">Edit</button>
-                        </td>
+                        <td class="site-duties" style="white-space: pre-wrap"></td>
+                        <td class="site-start"></td>
                     </tr>
                     </tbody>
                 </table>
-                <p>Click on the map to add new sites</p>
+                <p>Click on the map to add a new site</p>
                 <div class="mb-2 row g-2">
                     <label class="col-sm-4 col-form-label" for="min-start-at">Start after</label>
                     <div class="col-sm-8"><input class="form-control" id="min-start-at" type="time" step="60"></div>
@@ -140,7 +139,7 @@
             </div>
             <div id="show-paths-pane" class="d-none">
                 <h2 class="mb-2">Calculated paths</h2>
-                <p>Click on the paths below to see more details</p>
+                <p>Click on a path below to see more details</p>
                 <table class="table table-hover">
                     <thead>
                     <tr>

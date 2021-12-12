@@ -125,6 +125,7 @@ class Hub {
     for (const otherSite of this.sites) {
       otherSite.marker.setOpacity(otherSite === site ? 1.0 : 0.5)
     }
+    this.map.panTo(site.marker.getLatLng(), { animate: true })
 
     // Fill in the form
     $('#site-name').value = site.name
@@ -197,8 +198,15 @@ class Hub {
       row.classList.add('site')
       $('.site-name', row).textContent = site.name
       $('.site-visit', row).textContent = site.visit
-      $('.site-duties', row).textContent = site.duties.length
-      $('.site-edit', row).onclick = () => {
+      let duties
+      if (site.duties.length === 0) {
+        duties = '-'
+      } else {
+        duties = site.duties.map(duty => `${duty.start} - ${duty.end}`).join('\n')
+      }
+      $('.site-duties', row).textContent = duties
+      $('.site-start', row).textContent = site.canStartHere ? 'Yes' : ''
+      row.onclick = () => {
         this.editSite(site)
       }
       $('.sites', this.showSitesPane).appendChild(row)
