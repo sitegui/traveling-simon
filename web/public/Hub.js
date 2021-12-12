@@ -30,13 +30,18 @@ class Hub {
     }
 
     // Start edit-site pane
+    $('form', this.editSitePane).onchange = () => {
+      this.autoSaveSite()
+    }
     $('#site-duty-add').onclick = event => {
       event.preventDefault()
       this.pushDutyRow('', '')
     }
-    $('#edit-site-pane form').onsubmit = event => {
+    $('form', this.editSitePane).onsubmit = event => {
       event.preventDefault()
-      this.saveSite()
+      if (this.autoSaveSite()) {
+        this.showSites()
+      }
     }
     $('#site-back').onclick = event => {
       event.preventDefault()
@@ -108,7 +113,14 @@ class Hub {
   }
 
   addSite (latitude, longitude) {
-    const name = `Site ${this.sites.length + 1}`
+    // Find an unused name
+    let name
+    let n = 1
+    do {
+      name = `Site ${n}`
+      n += 1
+    } while (!this.sites.every(site => site.name !== name))
+
     const site = new Site(name, latitude, longitude)
     if (this.sites.length === 0) {
       site.canStartHere = true
@@ -137,6 +149,7 @@ class Hub {
     for (const duty of site.duties) {
       this.pushDutyRow(duty.start, duty.end)
     }
+    this.pushDutyRow('', '')
     $('#site-can-start-here').checked = site.canStartHere
   }
 
@@ -151,6 +164,7 @@ class Hub {
     $('#site-duty-remove', newRow).onclick = event => {
       event.preventDefault()
       newRow.remove()
+      this.autoSaveSite()
     }
   }
 
@@ -163,25 +177,49 @@ class Hub {
     this.showSites()
   }
 
-  saveSite () {
-    // TODO: check invariants: unique name and valid bounded time windows
+  autoSaveSite () {
+    // Name
+    const nameEl = $('#site-name')
+    const name = nameEl.value
+    const validName = this.sites.every(otherSite => otherSite === this.editingSite || otherSite.name !== name)
+    nameEl.setCustomValidity(validName ? '' : 'Another site with this name already exists')
+    nameEl.classList.toggle('is-invalid', !validName)
+    if (validName) {
+      this.editingSite.name = name
+    }
 
-    this.editingSite.name = $('#site-name').value
-    this.editingSite.serviceTimeMinutes = Number.parseInt($('#site-service-time').value)
-    this.editingSite.visit = $('#edit-site-pane form')['site-visit'].value
-    this.editingSite.duties = []
+    // Duties
+    const duties = []
+    let validDuties = true
     for (const row of $$('tr.site-duty')) {
       const start = $('#site-duty-start', row).value
-      const end = $('#site-duty-end', row).value
+      const endEl = $('#site-duty-end', row)
+      const end = endEl.value
+      let error = ''
       if (start !== '' && end !== '') {
-        this.editingSite.duties.push({ start, end })
+        if (end < start) {
+          error = 'It cannot end before it starts'
+          validDuties = false
+        } else {
+          duties.push({ start, end })
+        }
       }
+      endEl.setCustomValidity(error)
+      endEl.classList.toggle('is-invalid', error !== '')
     }
+    if (validDuties) {
+      this.editingSite.duties = duties
+    }
+
+    const formEl = $('#edit-site-pane form')
+    this.editingSite.serviceTimeMinutes = Number($('#site-service-time').value)
+    this.editingSite.visit = formEl['site-visit'].value
     this.editingSite.canStartHere = $('#site-can-start-here').checked
     this.updateSiteMarker(this.editingSite)
 
     this.persistStorage()
-    this.showSites()
+
+    return formEl.checkValidity()
   }
 
   showSites () {
