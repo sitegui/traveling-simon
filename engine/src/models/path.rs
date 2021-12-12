@@ -96,6 +96,17 @@ impl Path {
             Some(stop) => (stop.site, stop.service_end),
         }
     }
+
+    #[cfg(test)]
+    pub fn mock() -> Self {
+        Path {
+            start_in: SiteId::from(0),
+            start_at: Timestamp::from(0),
+            stops: vec![],
+            cost: PathCost::mock(),
+            visited_sites: BTreeSet::new(),
+        }
+    }
 }
 
 impl fmt::Display for Path {

@@ -3,8 +3,8 @@ use crate::path_bag::PathBag;
 
 /// Builds a set of interesting paths
 pub fn build(world: &World) -> PathBag {
-    let mut base_paths = PathBag::new();
-    let mut finished_paths = PathBag::new();
+    let mut base_paths = PathBag::new(world.max_bag_items);
+    let mut finished_paths = PathBag::new(world.max_bag_items);
 
     // Add seed paths, based on each desired starting position
     for site in &world.sites {
@@ -15,7 +15,11 @@ pub fn build(world: &World) -> PathBag {
     }
 
     while !base_paths.is_empty() {
-        log::info!("Build iteration starting from {} paths", base_paths.len());
+        log::info!(
+            "Build iteration starting from {} paths, by score = {:?}",
+            base_paths.len(),
+            base_paths.count_by_score()
+        );
         base_paths = build_iteration(world, &mut finished_paths, base_paths);
     }
 
@@ -30,10 +34,10 @@ struct ExtensionInfo {
 }
 
 fn build_iteration(world: &World, finished_paths: &mut PathBag, base_paths: PathBag) -> PathBag {
-    let mut new_bag = PathBag::new();
+    let mut new_bag = PathBag::new(world.max_bag_items);
 
     // For each base path, try all possible extensions
-    for base_path in base_paths.into_vec() {
+    for base_path in base_paths.into_paths() {
         extend_path(world, &base_path, &mut new_bag);
 
         if base_path.visited_sites.is_superset(&world.must_visit) {
@@ -46,7 +50,7 @@ fn build_iteration(world: &World, finished_paths: &mut PathBag, base_paths: Path
 
 /// Try at most `max_candidates` modifications to the given base path, adding one more stop at the
 /// end. Returns `true` if at least one new path was inserted into the resulting bag.
-fn extend_path(world: &World, base_path: &Path, sink: &mut PathBag) -> bool {
+fn extend_path(world: &World, base_path: &Path, sink: &mut PathBag) {
     let (end_in, end_at) = base_path.end();
 
     // Collect all possible extensions
@@ -82,25 +86,26 @@ fn extend_path(world: &World, base_path: &Path, sink: &mut PathBag) -> bool {
     }
 
     // Collect the best candidate sites to extend this path
-    let num_before = extensions.len();
-    extensions.sort_by_key(|info| info.earliest_service_start);
-    let best_extensions = extensions
-        .into_iter()
-        .take(world.max_tested_extensions.try_into().unwrap());
-    log::debug!(
-        "Selected {} out of {} valid extensions",
-        best_extensions.len(),
-        num_before
-    );
-
-    let mut changed = false;
+    if extensions.is_empty() {
+        return;
+    } else if extensions.len() <= world.max_tested_extensions {
+        log::debug!("Selected {} valid extensions", extensions.len());
+    } else {
+        log::debug!(
+            "Selected {} out of {} valid extensions",
+            world.max_tested_extensions,
+            extensions.len(),
+        );
+        extensions.sort_by_key(|info| info.earliest_service_start);
+        extensions.truncate(world.max_tested_extensions);
+    }
 
     // Try each extension: the vec `new_stops` will be pushed and popped at every iteration
     let mut new_stops = Vec::with_capacity(base_path.stops.len() + 1);
     for stop in &base_path.stops {
         new_stops.push(stop.sketch());
     }
-    for extension in best_extensions {
+    for extension in extensions {
         // Schedule path
         new_stops.push(StopSketch {
             site: extension.site,
@@ -117,9 +122,7 @@ fn extend_path(world: &World, base_path: &Path, sink: &mut PathBag) -> bool {
                 }
             }
 
-            changed |= sink.add(new_path);
+            sink.add(new_path);
         }
     }
-
-    changed
 }

@@ -31,6 +31,7 @@ impl Site {
             duties: vec![],
             service_time: Duration::ZERO,
             must_visit: false,
+            can_start_here: false,
         }
     }
 }

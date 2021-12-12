@@ -9,6 +9,8 @@ pub struct World {
     pub min_start_at: Timestamp,
     pub max_end_at: Option<Timestamp>,
     pub max_tested_extensions: i32,
+    pub max_bag_items: i32,
+    pub max_results: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

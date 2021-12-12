@@ -36,6 +36,16 @@ impl PathCost {
             stops: Reverse(stops.len() as i32),
         }
     }
+
+    #[cfg(test)]
+    pub fn mock() -> Self {
+        PathCost {
+            total_ride: Duration::ZERO,
+            total_time: Duration::ZERO,
+            stops_on_duty: Reverse(0),
+            stops: Reverse(0),
+        }
+    }
 }
 
 impl PartialOrd for PathCost {

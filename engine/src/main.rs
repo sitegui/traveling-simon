@@ -25,9 +25,9 @@ fn main() -> Result<()> {
 
     // Print answers
     let answer = built
-        .into_vec()
-        .into_iter()
+        .into_paths()
         .map(|path| output::Path::new(&world, &path))
+        .take(world.max_results)
         .collect_vec();
     let answer_str = serde_json::to_string(&answer).context("failed to encode answer")?;
     println!("{}", answer_str);

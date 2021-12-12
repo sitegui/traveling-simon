@@ -13,7 +13,11 @@ pub struct World {
     pub must_visit: BTreeSet<SiteId>,
     // Heuristics parametrization
     /// The maximum number of extensions to test from each base path during the initial build phase
-    pub max_tested_extensions: i32,
+    pub max_tested_extensions: usize,
+    /// The maximum of paths to consider at any time
+    pub max_bag_items: usize,
+    /// The maximum number of results to return
+    pub max_results: usize,
 }
 
 impl World {
@@ -44,7 +48,9 @@ impl World {
             min_start_at: input.min_start_at,
             max_end_at: input.max_end_at,
             ride_matrix,
-            max_tested_extensions: input.max_tested_extensions,
+            max_tested_extensions: input.max_tested_extensions.try_into()?,
+            max_bag_items: input.max_bag_items.try_into()?,
+            max_results: input.max_results.try_into()?,
         })
     }
 
@@ -61,11 +67,13 @@ impl World {
         let ride_matrix = RideMatrix::new(sites.len());
         World {
             sites,
-            start_in_one_of: Default::default(),
             min_start_at: Timestamp::mock(),
             max_end_at: None,
             ride_matrix,
+            must_visit: BTreeSet::new(),
             max_tested_extensions: 0,
+            max_bag_items: 0,
+            max_results: 0,
         }
     }
 }
