@@ -110,6 +110,9 @@ class Hub {
   addSite (latitude, longitude) {
     const name = `Site ${this.sites.length + 1}`
     const site = new Site(name, latitude, longitude)
+    if (this.sites.length === 0) {
+      site.canStartHere = true
+    }
     this.sites.push(site)
     this.updateSiteMarker(site)
     this.editSite(site)

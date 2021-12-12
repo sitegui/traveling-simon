@@ -7,7 +7,7 @@ class Site {
     this.serviceTimeMinutes = 5
     this.visit = Site.VISIT_ALWAYS
     this.duties = []
-    this.canStartHere = true
+    this.canStartHere = false
   }
 }
 
