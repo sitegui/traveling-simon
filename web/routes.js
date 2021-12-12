@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
+const ENGINE_PATH = process.env.ENGINE_PATH || '../data/traveling-simon'
 const axios = require('axios')
 const child_process = require('child_process')
 
@@ -54,8 +55,9 @@ router.post('/api/ride-durations', async (req, res, next) => {
 // Proxy the call to the engine binary
 router.post('/api/calculate-paths', (req, res, next) => {
   try {
-    const child = child_process.execFile('../data/traveling-simon', (err, stdout, stderr) => {
+    const child = child_process.execFile(ENGINE_PATH, (err, stdout, stderr) => {
       if (err) {
+        console.log(err)
         res.status(500)
         return res.json({
           error: stderr
